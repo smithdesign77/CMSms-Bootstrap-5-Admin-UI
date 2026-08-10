@@ -1,0 +1,853 @@
+/*
+ * Bootstrap admin theme for CMS Made Simple - chrome styling.
+ * Loaded via admin/style.php (which also appends every admin-capable
+ * module's AdminStyle() output after this - see map.md) and directly
+ * by templates/login.tpl.
+ */
+
+:root {
+    --bs-admin-topbar-h: 56px;
+    --bs-admin-sidebar-w: 260px;
+}
+
+body {
+    background-color: #f5f6f8;
+}
+
+/* ---------- drag-to-reorder list (CMSContentManager's "Inhalt neu
+   anordnen", modules/CMSContentManager/templates/admin_ordercontent.tpl)
+   ----------
+ * The module's own nestedSortable() init (handle:'div', items:'li', ...)
+ * never sets jQuery UI's `cursor` option, so the browser falls back to its
+ * default text cursor over what's otherwise plain text content - nothing
+ * ever signals "this is draggable", and mid-drag it visually reads as text
+ * selection rather than an item being moved. Can't add class="list-group"
+ * to the module's own markup (not ours to edit), so this reproduces that
+ * look by targeting the existing #masterlist/li/.label structure directly
+ * - same approach used for .pagetable/.pagetext etc. elsewhere in this
+ * theme. Only #masterlist itself carries a class; nested <ul>s (one per
+ * indent level) are bare, so #masterlist li matches every depth.
+ */
+#masterlist,
+#masterlist ul {
+    list-style: none;
+}
+
+#masterlist {
+    padding-left: 0;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    overflow: hidden;
+}
+
+#masterlist li {
+    border-top: 1px solid #dee2e6;
+}
+
+#masterlist > li:first-child {
+    border-top: 0;
+}
+
+#masterlist div.label {
+    padding: .5rem .75rem;
+    cursor: move;
+    user-select: none;
+}
+
+#masterlist div.label:hover {
+    background-color: #f8f9fa;
+}
+
+/* Custom, "Bootstrap-flavoured" utility - not a real Bootstrap class, hence
+ * the bs- prefix (matching .bs-sidebar/.bs-nav-icon/etc. elsewhere in this
+ * theme) so it doesn't get mistaken for an actual Bootstrap utility later.
+ * Used on topcontent.tpl's per-section link list: sections with many
+ * children (e.g. "Webseiten-Administration") made their dashboard card
+ * much taller than sparser siblings in the same row. column-width lets
+ * the browser collapse back to a single column on narrow/mobile cards
+ * instead of forcing 2 columns unconditionally.
+ */
+.bs-columns-2 {
+    column-count: 2;
+    column-width: 11rem;
+    column-gap: 1.5rem;
+}
+
+.bs-columns-2 li {
+    break-inside: avoid;
+}
+
+/* Even at column-width:11rem, a long compound word (German nav labels
+ * like "Auftragsverarbeitung") can still be the single longest "word" in
+ * an ~10rem-wide column. hyphens:auto uses the browser's language-aware
+ * hyphenation (relies on <html lang="de">, confirmed present) for a
+ * proper break point instead of an arbitrary character cut; overflow-wrap
+ * is the fallback for the rare word hyphenation doesn't have a rule for.
+ */
+.bs-columns-2 li a {
+    hyphens: auto;
+    overflow-wrap: break-word;
+}
+
+/* ---------- top bar ---------- */
+.bs-topbar {
+    background-color: #212529;
+    min-height: var(--bs-admin-topbar-h);
+}
+
+.bs-topbar .navbar-brand {
+    font-weight: 600;
+}
+
+/* Bootstrap's .btn-link always underlines by default (it's meant to look
+ * like a text link even though it's a <button>) - fine for text buttons,
+ * but ugly under a bare hamburger glyph. Scoped to the topbar's own
+ * icon-only toggle buttons rather than overriding .btn-link everywhere,
+ * in case a module intentionally wants an underlined link-button.
+ */
+.bs-topbar .btn-link {
+    text-decoration: none;
+}
+
+/* ---------- shell / sidebar layout ---------- */
+.bs-shell {
+    display: flex;
+    align-items: stretch;
+    min-height: calc(100vh - var(--bs-admin-topbar-h));
+}
+
+.bs-sidebar {
+    width: var(--bs-admin-sidebar-w);
+    flex: 0 0 var(--bs-admin-sidebar-w);
+    background-color: #fff;
+    border-right: 1px solid #dee2e6;
+}
+
+/* .nav sets flex-wrap:wrap (for its primary horizontal-tabs use case);
+ * .flex-column only overrides flex-direction, not flex-wrap. With both
+ * still active, during Bootstrap's own .collapsing height transition
+ * (0 -> full or full -> 0) any moment where the animated height can't
+ * fit every <li> in one column makes them wrap into a second column
+ * beside it instead - i.e. briefly horizontal, exactly for the
+ * transition's duration, settling back to a single vertical column once
+ * the height is either 0 (nothing to wrap) or full (everything fits).
+ */
+.bs-sidebar-nav,
+.bs-sidebar-sub {
+    flex-wrap: nowrap;
+}
+
+.bs-sidebar-nav .nav-link {
+    color: #212529;
+    padding: .5rem 1rem;
+    border-radius: 0;
+}
+
+.bs-sidebar-nav .nav-link.active,
+.bs-sidebar-nav .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.bs-sidebar-sub {
+    background-color: #f8f9fa;
+}
+
+.bs-sidebar-sub .nav-link {
+    padding-left: 2rem;
+    font-size: .9rem;
+}
+
+.bs-nav-caret {
+    font-size: 1rem;
+    transition: transform .15s ease-in-out;
+}
+
+.bs-nav-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.bs-sidebar-nav a[aria-expanded="true"] .bs-nav-caret {
+    transform: rotate(180deg);
+}
+
+.bs-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+@media (min-width: 992px) {
+    .offcanvas-lg.bs-sidebar {
+        position: sticky;
+        top: var(--bs-admin-topbar-h);
+        height: calc(100vh - var(--bs-admin-topbar-h));
+        overflow-y: auto;
+        /* Explicit (not "auto") so an open narrow-mode submenu - which
+         * overflows .bs-sidebar's 56px column into the space above
+         * .bs-main - reliably paints in front of it. z-index:auto on a
+         * position:sticky element is supposed to still out-stack a
+         * position:static sibling per spec, but that was visibly not
+         * holding up here, and this is the standard, well-understood fix
+         * for exactly this situation - a small explicit value beats any
+         * neighbour still sitting at the implicit auto/0 layer, no need
+         * to touch .bs-main at all.
+         */
+        z-index: 2;
+    }
+}
+
+/* ---------- narrow sidebar (desktop) ----------
+ * Toggled by #bs-sidebar-narrow-toggle in pagetemplate.tpl (class added to
+ * <html>, see admin-bridge.js + the pre-paint snippet in <head>). Different
+ * from the mobile offcanvas button, which hides the sidebar entirely -
+ * this keeps it present but icon-only, a nice-to-have carried over from
+ * OneEleven's own collapsible sidebar. Icons are the topfiles/{section}
+ * set (icons/icons/topfiles/*.png) already used on the section overview
+ * cards in topcontent.tpl - see navigation.tpl.
+ */
+:root {
+    --bs-admin-sidebar-narrow-w: 56px;
+}
+
+html.bs-sidebar-narrow .bs-sidebar {
+    width: var(--bs-admin-sidebar-narrow-w);
+    flex-basis: var(--bs-admin-sidebar-narrow-w);
+    /* Base .offcanvas-lg.bs-sidebar rule sets overflow-y:auto for the
+     * sticky scroll area; per spec, setting only one overflow axis forces
+     * the other to "auto" as well, which would clip an open submenu's
+     * text horizontally instead of letting it overflow past the 56px
+     * column as intended below. */
+    overflow: visible;
+}
+
+html.bs-sidebar-narrow .bs-sidebar-nav .bs-nav-label,
+html.bs-sidebar-narrow .bs-sidebar-nav > .nav-item > a > .bs-nav-caret {
+    display: none;
+}
+
+html.bs-sidebar-narrow .bs-sidebar-nav > .nav-item > a {
+    justify-content: center;
+    padding: .6rem 0;
+}
+
+html.bs-sidebar-narrow .bs-nav-icon {
+    margin: 0 !important;
+    width: 25px;
+    height: 25px;
+}
+
+/* Submenus expand downward in place, same as normal (wide) mode - no
+ * flyout/position:absolute/z-index. Simpler and requested over the
+ * flyout after the flyout turned out to render behind the page content.
+ * The tradeoff: an open submenu's text needs more room than the 56px
+ * icon column, so we let it (and only it, while expanded) grow past the
+ * column width instead of wrapping every label into a narrow ribbon. */
+html.bs-sidebar-narrow .bs-sidebar-sub {
+    width: max-content;
+    min-width: 100%;
+    /* It now visually overlaps .bs-main once open (see the z-index fix
+     * above) - a border + rounded corner reads as "this is a floating
+     * panel", matching Bootstrap's own .dropdown-menu treatment. Scoped to
+     * narrow mode only: in wide mode this is an inline accordion panel
+     * flush under its trigger link, not an overlay, and a border there
+     * would just look like an odd seam against the link above it.
+     */
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+}
+
+html.bs-sidebar-narrow .bs-sidebar-sub .bs-nav-label {
+    display: inline;
+}
+
+/* ---------- tabs (target of BootstrapTheme::bootstrapify_tabs()) ---------- */
+#page_tabs.nav-tabs {
+    margin-bottom: 1rem;
+}
+
+#page_content.tab-content {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    padding: 1rem;
+}
+
+/* ---------- misc form/content niceties ---------- */
+textarea {
+    resize: vertical;
+}
+
+/* ---------- .pagetext/.pageinput form-row convention ----------
+ * The single most widespread form layout pattern in the whole codebase
+ * (70 core/module files): <div class="pageoverflow"><p class="pagetext">
+ * <label>Name:</label> {cms_help}</p><p class="pageinput">...field...</p>
+ * </div>. Both are plain <p> tags with default browser paragraph margins
+ * on all four sides, so a label and the field it belongs to end up exactly
+ * as far apart as two unrelated paragraphs - nothing visually ties them
+ * together as a pair, which is what made the whole page read as a loose
+ * wall of text rather than a list of distinct fields. Tightens the
+ * label->field gap and gives the label itself a semibold weight, while
+ * leaving the (larger, browser-default) gap AFTER .pageinput alone so
+ * separate field groups still read as separate.
+ */
+.pagetext {
+    margin-bottom: .25rem;
+    font-weight: 600;
+}
+
+.pagetext + .pageinput {
+    margin-top: 0;
+}
+
+/* Bugfix: several core module templates (e.g.
+ * modules/CMSContentManager/templates/ajax_get_content.tpl) predate this
+ * theme and reuse the literal class "tooltip" as their own "this element
+ * gets a hover tooltip" marker. Bootstrap's .tooltip{opacity:0} is meant
+ * only for the popup element its own JS creates (which always carries
+ * role="tooltip"). admin-bridge.js strips the stray "tooltip" class off
+ * these elements once it wires up a real Bootstrap tooltip on them - this
+ * is a defense-in-depth fallback for the brief window before that JS runs
+ * (or if it fails/is disabled), so page titles etc. are never silently
+ * invisible.
+ */
+.tooltip:not([role="tooltip"]) {
+    opacity: 1 !important;
+}
+
+.cms_help {
+    display: inline-block;
+}
+
+.cms_help .cms_helpicon {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    vertical-align: text-top;
+}
+
+table.table th {
+    white-space: nowrap;
+}
+
+.bs-footer a {
+    color: inherit;
+}
+
+/* ---------- dual available/attached lists (DesignManager) ----------
+ * .c_full > .grid_6 + .grid_6: the same pre-Bootstrap grid_N convention as
+ * the toolbar fix above, but a different split (2x half-width panels, not
+ * toolbar-vs-search) and not covered by the :has(> .grid_8) rule there.
+ * Used for "Verfügbare/Verknüpfte Vorlagen" (admin_edit_design_templates.tpl)
+ * and the equivalent stylesheets/content-block assignment screens
+ * (admin_edit_design_stylesheets.tpl, admin_edit_css.tpl,
+ * admin_edit_template.tpl all share the class). Without this, .grid_6
+ * means nothing to Bootstrap and both panels just stack full page width -
+ * fine on mobile, needlessly wide/tall on desktop for what's just a list
+ * of short template/stylesheet names. Side-by-side from md up only, per
+ * request; below that, stacked full-width is the reasonable fallback for
+ * a "not really responsive, no better solution yet" layout.
+ */
+@media (min-width: 768px) {
+    .c_full:has(> .grid_6) {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .c_full > .grid_6 {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}
+
+/* .information (18 core/module files - a widespread instructional-text
+ * convention, same "old class predates Bootstrap, not ours to add
+ * class="small" to" situation as .pagetext etc.) - matches Bootstrap's
+ * own .small utility value (.875em) so this reads consistently with any
+ * place .small actually is used.
+ */
+.information {
+    font-size: .875em;
+}
+
+/* Same list-group treatment as #masterlist above, for consistency -
+ * "text-only" bullet lists here too. Items also carry jQuery UI's own
+ * .ui-state-default/.ui-state-hover classes (still functional, untouched -
+ * jQuery UI CSS only ever qualifies with .ui-* classes, confirmed earlier
+ * this session, so no selector collision), which is why hover/selected
+ * feedback still works underneath this.
+ */
+.sortable-list {
+    list-style: none;
+    padding-left: 0;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    overflow: hidden;
+}
+
+.sortable-list li {
+    font-size: .875em;
+    border-top: 1px solid #dee2e6;
+    padding: .4rem .6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sortable-list li:first-child {
+    border-top: 0;
+}
+
+/* .sortable-remove (modules/DesignManager/templates/
+ * admin_edit_design_templates.tpl and its stylesheets/css-editor
+ * equivalents) reuses jQuery UI's .ui-icon-trash for "detach this item
+ * from the design" - the JS behind it (see admin_edit_design_templates.tpl)
+ * only ever does $(li).appendTo('#available-templates ul'); nothing is
+ * deleted, the item just moves back to the "available" list. A trash can
+ * reads as permanent deletion and could make a user hesitate to use a
+ * perfectly reversible action. Swapped for Font Awesome Free's "unlink"
+ * glyph (CC BY 4.0, https://github.com/FortAwesome/Font-Awesome, kept as
+ * a full path rather than redrawn to preserve attribution) - names the
+ * actual action (breaking an association) more precisely than a plain
+ * "x" would. Recolored to this theme's neutral icon grey; same
+ * hand-authored content:url() SVG-override technique used for the
+ * {admin_icon} .gif icons elsewhere in this theme, since jQuery UI's icon
+ * classes are sprite-based and not straightforward to reskin by
+ * repositioning alone.
+ */
+.sortable-remove.ui-icon-trash {
+    background-image: none !important;
+    text-indent: 0 !important;
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    display: inline-block;
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjNDk1MDU3IiBkPSJNMzA0LjA4MyA0MDUuOTA3YzQuNjg2IDQuNjg2IDQuNjg2IDEyLjI4NCAwIDE2Ljk3MWwtNDQuNjc0IDQ0LjY3NGMtNTkuMjYzIDU5LjI2Mi0xNTUuNjkzIDU5LjI2Ni0yMTQuOTYxIDAtNTkuMjY0LTU5LjI2NS01OS4yNjQtMTU1LjY5NiAwLTIxNC45Nmw0NC42NzUtNDQuNjc1YzQuNjg2LTQuNjg2IDEyLjI4NC00LjY4NiAxNi45NzEgMGwzOS41OTggMzkuNTk4YzQuNjg2IDQuNjg2IDQuNjg2IDEyLjI4NCAwIDE2Ljk3MWwtNDQuNjc1IDQ0LjY3NGMtMjguMDcyIDI4LjA3My0yOC4wNzIgNzMuNzUgMCAxMDEuODIzIDI4LjA3MiAyOC4wNzIgNzMuNzUgMjguMDczIDEwMS44MjQgMGw0NC42NzQtNDQuNjc0YzQuNjg2LTQuNjg2IDEyLjI4NC00LjY4NiAxNi45NzEgMGwzOS41OTcgMzkuNTk4em0tNTYuNTY4LTI2MC4yMTZjNC42ODYgNC42ODYgMTIuMjg0IDQuNjg2IDE2Ljk3MSAwbDQ0LjY3NC00NC42NzRjMjguMDcyLTI4LjA3NSA3My43NS0yOC4wNzMgMTAxLjgyNCAwIDI4LjA3MiAyOC4wNzMgMjguMDcyIDczLjc1IDAgMTAxLjgyM2wtNDQuNjc1IDQ0LjY3NGMtNC42ODYgNC42ODYtNC42ODYgMTIuMjg0IDAgMTYuOTcxbDM5LjU5OCAzOS41OThjNC42ODYgNC42ODYgMTIuMjg0IDQuNjg2IDE2Ljk3MSAwbDQ0LjY3NS00NC42NzVjNTkuMjY1LTU5LjI2NSA1OS4yNjUtMTU1LjY5NSAwLTIxNC45Ni01OS4yNjYtNTkuMjY0LTE1NS42OTUtNTkuMjY0LTIxNC45NjEgMGwtNDQuNjc0IDQ0LjY3NGMtNC42ODYgNC42ODYtNC42ODYgMTIuMjg0IDAgMTYuOTcxbDM5LjU5NyAzOS41OTh6bTIzNC44MjggMzU5LjI4bDIyLjYyNy0yMi42MjdjOS4zNzMtOS4zNzMgOS4zNzMtMjQuNTY5IDAtMzMuOTQxTDYzLjU5OCA3LjAyOWMtOS4zNzMtOS4zNzMtMjQuNTY5LTkuMzczLTMzLjk0MSAwTDcuMDI5IDI5LjY1N2MtOS4zNzMgOS4zNzMtOS4zNzMgMjQuNTY5IDAgMzMuOTQxbDQ0MS4zNzMgNDQxLjM3M2M5LjM3MyA5LjM3MiAyNC41NjkgOS4zNzIgMzMuOTQxIDB6Ii8+PC9zdmc+");
+}
+
+/* busy indicator, created on demand by admin-bridge.js::cms_busy() */
+#cms_busy {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: repeating-linear-gradient(90deg, #0d6efd 0 20px, transparent 20px 40px);
+    background-size: 200% 100%;
+    animation: bs-busy-stripe 1s linear infinite;
+    z-index: 2000;
+}
+
+@keyframes bs-busy-stripe {
+    from { background-position: 0 0; }
+    to   { background-position: 40px 0; }
+}
+
+/* ---------- login page ---------- */
+/* Background now comes from the .bg-light utility class directly on
+ * <body> in login.tpl (own file, no reason to hand-roll it in CSS) -
+ * a light grey instead of the previous dark background made the white
+ * .shadow card read as a clearly "lifted" panel rather than the whole
+ * page just being a dark box.
+ */
+.bs-login {
+    min-height: 100vh;
+}
+
+/* ---------- horizontal-overflow guard ----------
+ * {admin_icon}/module content (e.g. CMSContentManager's page list table)
+ * routinely exceeds the viewport width and there is no wrapper anywhere
+ * in core/module markup that constrains it. pagetemplate.tpl wraps
+ * {$content} in .bs-content-scroll for exactly this - same mechanism as
+ * Bootstrap's own .table-responsive, applied once, theme-wide, instead of
+ * per-module.
+ */
+.bs-content-scroll {
+    overflow-x: auto;
+    max-width: 100%;
+    /* Containing block for absolutely-positioned descendants (e.g. the
+     * label.invisible fix above, and Bootstrap's own .visually-hidden -
+     * both use position:absolute). Without this, such elements ignore
+     * .bs-content-scroll's clipping entirely and are positioned relative
+     * to the document instead, reintroducing page-level horizontal
+     * overflow even though they're visually a 1x1px non-issue themselves.
+     */
+    position: relative;
+}
+
+/* ---------- table header contrast ----------
+ * Module tables (e.g. table.pagetable) ship a real <thead>/<th> but no
+ * theme ever styled bare <th> - core CSS pre-dates this theme entirely.
+ */
+table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    padding: .5rem;
+    text-align: left;
+}
+
+/* ---------- .table-bordered / .table-sm equivalent for module tables ----------
+ * table.pagetable (CMSContentManager's content list, and other module list
+ * tables sharing the same convention) does not carry Bootstrap's own
+ * .table class, so the .table-bordered/.table-sm MODIFIER classes would
+ * do nothing even if we could add them to markup we don't own - both only
+ * activate in combination with .table. This reproduces their actual CSS
+ * behaviour directly against .pagetable instead. Also turns on the
+ * zebra-striping the module already half-implements itself via
+ * tr.row1/tr.row2 (an old manual-alternation convention, currently unstyled).
+ */
+.pagetable {
+    border-collapse: collapse;
+    border: 1px solid #dee2e6;
+    /* Bootstrap's own .table is always width:100% by default too - without
+     * an explicit width, every .pagetable just sizes to its own content,
+     * so a short 2-row key/value table (e.g. systeminfo.tpl's "CMS-Version:
+     * 2.2.22") ends up narrow while a long list table next to it doesn't,
+     * reading as visually inconsistent even though each is individually
+     * "correct". Matching Bootstrap's default here is the more predictable,
+     * consistent choice site-wide.
+     */
+    width: 100%;
+}
+
+.pagetable th,
+.pagetable td {
+    border: 1px solid #dee2e6;
+    padding: .3rem .5rem;
+}
+
+.pagetable tr.row1 {
+    background-color: rgba(0, 0, 0, .03);
+}
+
+/* ---------- accessibility-label class collision ----------
+ * 4 core files (modules/CMSContentManager/templates/ajax_get_content.tpl,
+ * admin/templates/{adduser,listusers,myaccount}.tpl) use class="invisible"
+ * on <label>/<h3> elements meaning "screen-reader-only text, no visual
+ * footprint" - the pre-Bootstrap convention. Bootstrap ships its OWN
+ * .invisible utility with a DIFFERENT meaning: visibility:hidden, which
+ * keeps the element (and any text-wrap it causes) fully in the layout
+ * flow, just invisible. Concretely: CMSContentManager's per-row bulk-select
+ * <label class="invisible"> wraps a long sentence, which - now invisible
+ * but still laid out - wraps across many lines in the narrow checkbox
+ * column and silently stretches the WHOLE row to match (this is what was
+ * making every content-list row ~130px tall for no visible reason).
+ * Fix: give text-carrying elements Bootstrap's actual "hide but keep
+ * accessible" recipe (== Bootstrap's own .visually-hidden implementation)
+ * instead. Deliberately scoped to text-label tags, not bare div/span, so
+ * any (unverified, third-party) use of .invisible as a real
+ * show/hide-via-JS toggle on a container element is left alone.
+ */
+label.invisible,
+h1.invisible, h2.invisible, h3.invisible, h4.invisible, h5.invisible, h6.invisible,
+legend.invisible {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    visibility: visible !important;
+}
+
+/* ---------- toolbar row (.c_full > .grid_8 + .grid_4) ----------
+ * .c_full predates Bootstrap and is this codebase's generic "full-width
+ * grid row" wrapper - used for at least two different sub-patterns:
+ * (a) a toolbar: loose <a> links in a .grid_8 next to a search/pager form
+ *     in a .grid_4 (modules/CMSContentManager/templates/ajax_get_content.tpl
+ *     and modules/News/templates/articlelist.tpl, both as "row c_full cf";
+ *     admin/templates/adminlog.tpl, as plain "c_full" - same shape, no
+ *     .row class there, so it didn't collide with Bootstrap's .row and
+ *     stayed a dead, unstyled float layout instead - still broken, just
+ *     differently)
+ * (b) a label+field form row (modules/DesignManager/templates/
+ *     admin_defaultadmin_templates.tpl: <label class="grid_3">+
+ *     <select class="grid_9">) - NOT a toolbar, must NOT get this
+ *     flex-space-between treatment.
+ * :has(> .grid_8) targets only pattern (a) precisely, regardless of
+ * whether "row" is also present, without touching (b).
+ */
+.row.c_full,
+.c_full:has(> .grid_8) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    margin: 0 0 .75rem;
+}
+
+.row.c_full > .pageoptions,
+.c_full > .grid_8,
+.c_full > .grid_4 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem;
+    float: none;
+    width: auto;
+}
+
+.pageoptions a,
+.c_full > .grid_8 > a {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .25rem .6rem;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    background-color: #fff;
+    color: #495057;
+    font-size: .875rem;
+    line-height: 1.5;
+    text-decoration: none;
+}
+
+/* ---------- unstyled submit/button inputs ----------
+ * e.g. DesignManager's Speichern/Abbrechen/Anwenden (input#submitbtn/
+ * #cancelbtn/#applybtn, name="m1_submit" etc.) - bare <input type="submit">
+ * with no class. Some such buttons ARE enhanced by inline module JS via
+ * jQuery UI's real $(...).button() widget (now working again now that
+ * jQuery UI's CSS is loaded, see pagetemplate.tpl/login.tpl) - excluded
+ * here via :not(.ui-button) so we don't double up on those. Everything
+ * else gets a plain Bootstrap-btn-secondary-ish look instead of the
+ * native unstyled browser button.
+ *
+ * :not([class*="mce-"] *) excludes anything inside MicroTiny's bundled
+ * TinyMCE 4 - its whole UI framework (toolbar, menubar, dialogs,
+ * floatpanels) prefixes every wrapper with an "mce-*" class, but the
+ * interactive elements THEMSELVES (e.g. its 28 menubar/toolbar <button>s)
+ * often carry no class at all, so this rule was matching and reskinning
+ * them before this guard was added. TinyMCE stays fully autonomous now,
+ * confirmed against its actual DOM rather than assumed.
+ */
+input[type="submit"]:not(.btn):not(.ui-button):not([class*="mce-"] *),
+input[type="button"]:not(.btn):not(.ui-button):not([class*="mce-"] *),
+button:not(.btn):not(.ui-button):not(.navbar-toggler):not(.btn-close):not(.nav-link):not([class*="mce-"] *) {
+    display: inline-block;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    cursor: pointer;
+}
+
+input[type="submit"]:not(.btn):not(.ui-button):not([class*="mce-"] *):hover,
+input[type="button"]:not(.btn):not(.ui-button):not([class*="mce-"] *):hover,
+button:not(.btn):not(.ui-button):not(.navbar-toggler):not(.btn-close):not(.nav-link):not([class*="mce-"] *):hover {
+    background-color: #dde1e5;
+    border-color: #adb5bd;
+}
+
+.pageoptions a:hover,
+.c_full > .grid_8 > a:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+    color: #212529;
+}
+
+/* ---------- legacy plain form fields ----------
+ * Several module templates render bare <input>/<select>/<textarea> with
+ * no Bootstrap classes (e.g. CMSContentManager's #ajax_find search box,
+ * which jQuery UI autocomplete additionally decorates with its own
+ * .ui-autocomplete-input class). We can't add class="form-control" to
+ * markup we don't own, so this reproduces .form-control's look on the
+ * bare element instead. Elements that DO already carry .form-control get
+ * Bootstrap's own (more specific) rule and are unaffected.
+ */
+input[type="text"]:not(.form-control):not([class*="mce-"] *),
+input[type="search"]:not(.form-control):not([class*="mce-"] *),
+input[type="email"]:not(.form-control):not([class*="mce-"] *),
+input[type="password"]:not(.form-control):not([class*="mce-"] *),
+input[type="number"]:not(.form-control):not([class*="mce-"] *),
+input[type="url"]:not(.form-control):not([class*="mce-"] *),
+input[type="tel"]:not(.form-control):not([class*="mce-"] *),
+select:not(.form-control):not(.form-select):not([class*="mce-"] *),
+textarea:not(.form-control):not([class*="mce-"] *) {
+    display: inline-block;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+/* Textareas commonly carry a hardcoded cols="N" attribute (e.g.
+ * DesignManager's template/CSS editors: <textarea cols="20" rows="20">,
+ * meant as a fallback for pre-CSS browsers) which sets a narrow intrinsic
+ * width that plain `display:inline-block` above does not override - this
+ * is what was making the template/CSS content editors render ~188px wide
+ * in a full-width page. box-sizing is needed too since padding is set above.
+ * (MicroTiny's own source <textarea class="cms_textarea"> is excluded too -
+ * TinyMCE hides/replaces it with its iframe, but no reason to touch it.)
+ */
+textarea:not(.form-control):not([class*="mce-"] *) {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Code/template/CSS editors (DesignManager's admin_edit_template.tpl,
+ * admin_edit_css.tpl, admin_edit_type.tpl; News' editarticle.tpl; MicroTiny)
+ * consistently mark their content textareas with class="cms_textarea" -
+ * a real, codebase-wide convention, not this theme's own naming. Monospace
+ * matters for code/markup readability (indentation alignment etc.);
+ * scoped to that class specifically so an ordinary multi-line text field
+ * (e.g. a plain "Beschreibung" textarea) isn't affected.
+ */
+.cms_textarea {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: .9rem;
+}
+
+input[type="text"]:not(.form-control):not([class*="mce-"] *):focus,
+input[type="search"]:not(.form-control):not([class*="mce-"] *):focus,
+input[type="email"]:not(.form-control):not([class*="mce-"] *):focus,
+input[type="password"]:not(.form-control):not([class*="mce-"] *):focus,
+input[type="number"]:not(.form-control):not([class*="mce-"] *):focus,
+input[type="url"]:not(.form-control):not([class*="mce-"] *):focus,
+input[type="tel"]:not(.form-control):not([class*="mce-"] *):focus,
+select:not(.form-control):not(.form-select):not([class*="mce-"] *):focus,
+textarea:not(.form-control):not([class*="mce-"] *):focus {
+    color: #212529;
+    background-color: #fff;
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25);
+}
+
+/* ---------- {admin_icon} reskin (first batch) ----------
+ * admin/plugins/function.admin_icon.php renders <img src=".../icons/system/NAME.gif">
+ * looked up by cms_admin_utils::get_icon() under this theme's own
+ * images/icons/ - see map.md and images/icons/ (copied from OneEleven so
+ * every {admin_icon} call resolves at all). This block re-skins the icons
+ * actually seen in day-to-day use (content list, toolbars, cms_help) with
+ * small hand-authored SVGs via content:url() - the <img> tag, its src
+ * attribute and admin_icon.php itself are untouched, so this is pure
+ * presentation and safe to extend/revert one icon at a time. Icons not
+ * listed here still render via the copied OneEleven .gif fallback.
+ */
+img[src$="/true.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzE5ODc1NCIgZD0iTTEzLjcgMy4zYTEgMSAwIDAgMSAwIDEuNGwtNyA3YTEgMSAwIDAgMS0xLjQgMGwtMy0zYTEgMSAwIDEgMSAxLjQtMS40TDYgOS42bDYuMy02LjNhMSAxIDAgMCAxIDEuNCAweiIvPjwvc3ZnPg==");
+}
+img[src$="/false.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTQuMyAzLjNhMSAxIDAgMCAxIDEuNCAwTDggNS42bDIuMy0yLjNhMSAxIDAgMSAxIDEuNCAxLjRMOS40IDdsMi4zIDIuM2ExIDEgMCAwIDEtMS40IDEuNEw4IDguNGwtMi4zIDIuM2ExIDEgMCAwIDEtMS40LTEuNEw2LjYgNyA0LjMgNC43YTEgMSAwIDAgMSAwLTEuNHoiLz48L3N2Zz4=");
+}
+img[src$="/warning.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iI2ZkN2UxNCIgZD0iTTcuMSAyLjVhMSAxIDAgMCAxIDEuOCAwbDYgMTFBMSAxIDAgMCAxIDE0IDE1SDJhMSAxIDAgMCAxLS45LTEuNWw2LTExek04IDZhLjc1Ljc1IDAgMCAwLS43NS43NXYzYS43NS43NSAwIDAgMCAxLjUgMHYtM0EuNzUuNzUgMCAwIDAgOCA2em0wIDYuNWEuOS45IDAgMSAwIDAtMS44LjkuOSAwIDAgMCAwIDEuOHoiLz48L3N2Zz4=");
+}
+img[src$="/sort_up.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTggNGw1IDZIM3oiLz48L3N2Zz4=");
+}
+img[src$="/sort_down.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTggMTJMMyA2aDEweiIvPjwvc3ZnPg==");
+}
+img[src$="/expand.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzQ5NTA1NyIgZD0iTTUuNiAzLjNhMSAxIDAgMCAxIDEuNCAwbDQgNGExIDEgMCAwIDEgMCAxLjRsLTQgNGExIDEgMCAxIDEtMS40LTEuNEw5IDggNS42IDQuN2ExIDEgMCAwIDEgMC0xLjR6Ii8+PC9zdmc+");
+}
+img[src$="/contract.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzQ5NTA1NyIgZD0iTTMuMyA1LjZhMSAxIDAgMCAxIDEuNCAwTDggOC45bDMuMy0zLjNhMSAxIDAgMSAxIDEuNCAxLjRsLTQgNGExIDEgMCAwIDEtMS40IDBsLTQtNGExIDEgMCAwIDEgMC0xLjR6Ii8+PC9zdmc+");
+}
+img[src$="/expandall.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzQ5NTA1NyIgZD0iTTIgMmg1djEuNUgzLjVWN0gyVjJ6bTEyIDB2NWgtMS41VjMuNUg5VjJoNXpNMiAxNFY5aDEuNXYzLjVIN1YxNEgyem0xMiAwSDl2LTEuNWgzLjVWOUgxNHY1eiIvPjwvc3ZnPg==");
+}
+img[src$="/contractall.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzQ5NTA1NyIgZD0iTTYuNSAySDh2My41YTEgMSAwIDAgMS0xIDFIMy41VjVINlYyek04IDE0SDYuNXYtM0gzLjVWOS41SDdhMSAxIDAgMCAxIDEgMVYxNHptMi04LjVWMmgxLjV2M0gxNHYxLjVoLTMuNWExIDEgMCAwIDEtMS0xek05LjUgMTR2LTMuNWExIDEgMCAwIDEgMS0xSDE0VjExaC0zdjNIOS41eiIvPjwvc3ZnPg==");
+}
+img[src$="/edit.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzBkNmVmZCIgZD0iTTEyLjEgMS41YTEuNSAxLjUgMCAwIDEgMi4xIDBsLjMuM2ExLjUgMS41IDAgMCAxIDAgMi4xbC0xIDEtMi40LTIuNCAxLTF6TTEwIDMuNiAxMi40IDYgNC41IDEzLjlsLTMgLjcuNy0zTDEwIDMuNnoiLz48L3N2Zz4=");
+}
+img[src$="/newobject.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzE5ODc1NCIgZD0iTTggMWE3IDcgMCAxIDAgMCAxNEE3IDcgMCAwIDAgOCAxem0uOSA2LjFIMTF2MS44SDguOVYxMUg3LjFWOC45SDVWNy4xaDIuMVY1aDEuOHYyLjF6Ii8+PC9zdmc+");
+}
+img[src$="/info.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzBkY2FmMCIgZD0iTTggMWE3IDcgMCAxIDAgMCAxNEE3IDcgMCAwIDAgOCAxem0wIDMuMmExIDEgMCAxIDEgMCAyIDEgMSAwIDAgMSAwLTJ6TTkuMiAxMS41SDYuOHYtMS4yaC43VjcuOGgtLjdWNi42aDJ2My43aC43djEuMnoiLz48L3N2Zz4=");
+}
+img[src$="/reorder.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTUgMiAyLjMgNUg0djZIMi4zTDUgMTRsMi43LTNINlY1aDEuN0w1IDJ6bTYgMC0yLjcgM0gxMHY2SDguM0wxMSAxNGwyLjctM0gxMlY1aDEuN0wxMSAyeiIvPjwvc3ZnPg==");
+}
+img[src$="/run.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzE5ODc1NCIgZD0iTTQgMi41djExbDEwLTUuNS0xMC01LjV6Ii8+PC9zdmc+");
+}
+
+/* second batch - added after spotting the OneEleven/FA mix on
+ * Systeminformationen: status dots (green/yellow/red, dynamically named
+ * from admin/templates/systeminfo.tpl's {$test->res}.gif) plus the
+ * highest-frequency remaining {admin_icon} calls codebase-wide
+ * (delete.gif 12x, view.gif 10x, copy.gif/permissions.gif/import.gif 3x
+ * each) and info-external.gif (systeminfo.tpl's help-link icon). */
+img[src$="/green.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjYiIGZpbGw9IiMxOTg3NTQiLz48L3N2Zz4=");
+}
+img[src$="/yellow.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjYiIGZpbGw9IiNmZmMxMDciLz48L3N2Zz4=");
+}
+img[src$="/red.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjYiIGZpbGw9IiNkYzM1NDUiLz48L3N2Zz4=");
+}
+img[src$="/info-external.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTYgMmg4djhoLTEuNVY0LjZMNC44IDEyLjMgMy43IDExLjJsNy43LTcuN0g2VjJ6Ii8+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTIgNGgydjEuNUgzLjVWMTNoNy41di0uNUgxMlYxNGExIDEgMCAwIDEtMSAxSDNhMSAxIDAgMCAxLTEtMVY1YTEgMSAwIDAgMSAxLTF6Ii8+PC9zdmc+");
+}
+img[src$="/delete.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTYgMmg0bC41IDFIMTN2MS41SDNWM2gyLjVMNiAyem0tMiA0aDhsLS43IDguMWExIDEgMCAwIDEtMSAuOUg1LjdhMSAxIDAgMCAxLTEtLjlMNCA2eiIvPjwvc3ZnPg==");
+}
+img[src$="/view.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNOCAzQzQgMyAxLjMgNiAuNCA3LjVhMSAxIDAgMCAwIDAgMUMxLjMgMTAgNCAxMyA4IDEzczYuNy0zIDcuNi00LjVhMSAxIDAgMCAwIDAtMUMxNC43IDYgMTIgMyA4IDN6bTAgOC41QTMuNSAzLjUgMCAxIDEgOCA0LjVhMy41IDMuNSAwIDAgMSAwIDd6bTAtMS41QTIgMiAwIDEgMCA4IDZhMiAyIDAgMCAwIDAgNHoiLz48L3N2Zz4=");
+}
+img[src$="/copy.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHJlY3QgeD0iNSIgeT0iMSIgd2lkdGg9IjkiIGhlaWdodD0iOSIgcng9IjEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzZjNzU3ZCIgc3Ryb2tlLXdpZHRoPSIxLjMiLz48cmVjdCB4PSIyIiB5PSI1IiB3aWR0aD0iOSIgaGVpZ2h0PSI5IiByeD0iMSIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjNmM3NTdkIiBzdHJva2Utd2lkdGg9IjEuMyIvPjwvc3ZnPg==");
+}
+img[src$="/permissions.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTggMWEzIDMgMCAwIDAtMyAzdjJINGExIDEgMCAwIDAtMSAxdjdhMSAxIDAgMCAwIDEgMWg4YTEgMSAwIDAgMCAxLTFWN2ExIDEgMCAwIDAtMS0xaC0xVjRhMyAzIDAgMCAwLTMtM3ptLTEuNSA1VjRhMS41IDEuNSAwIDAgMSAzIDB2MmgtM3pNOCA5LjVhMSAxIDAgMCAxIC41IDEuODdWMTIuNWgtMXYtMS4xM0ExIDEgMCAwIDEgOCA5LjV6Ii8+PC9zdmc+");
+}
+img[src$="/import.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzE5ODc1NCIgZD0iTTggMWEuNzUuNzUgMCAwIDEgLjc1Ljc1djYuMTlsMS43Mi0xLjcyYS43NS43NSAwIDEgMSAxLjA2IDEuMDZsLTMgM2EuNzUuNzUgMCAwIDEtMS4wNiAwbC0zLTNhLjc1Ljc1IDAgMSAxIDEuMDYtMS4wNmwxLjcyIDEuNzJWMS43NUEuNzUuNzUgMCAwIDEgOCAxek0yIDExYTEgMSAwIDAgMSAxIDF2MWgxMHYtMWExIDEgMCAxIDEgMiAwdjEuNWExIDEgMCAwIDEtMSAxSDJhMSAxIDAgMCAxLTEtMVYxMmExIDEgMCAwIDEgMS0xeiIvPjwvc3ZnPg==");
+}
+img[src$="/export.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzBkNmVmZCIgZD0iTTggOS45NGEuNzUuNzUgMCAwIDEtLjc1LS43NVYzbC0xLjcyIDEuNzJhLjc1Ljc1IDAgMSAxLTEuMDYtMS4wNmwzLTNhLjc1Ljc1IDAgMCAxIDEuMDYgMGwzIDNhLjc1Ljc1IDAgMSAxLTEuMDYgMS4wNkw4Ljc1IDN2Ni4xOWEuNzUuNzUgMCAwIDEtLjc1Ljc1ek0yIDExYTEgMSAwIDAgMSAxIDF2MWgxMHYtMWExIDEgMCAxIDEgMiAwdjEuNWExIDEgMCAwIDEtMSAxSDJhMSAxIDAgMCAxLTEtMVYxMmExIDEgMCAwIDEgMS0xeiIvPjwvc3ZnPg==");
+}
+img[src$="/back.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTEwLjcgMy4zYTEgMSAwIDAgMSAwIDEuNEw3LjQgOGwzLjMgMy4zYTEgMSAwIDAgMS0xLjQgMS40bC00LTRhMSAxIDAgMCAxIDAtMS40bDQtNGExIDEgMCAwIDEgMS40IDB6Ii8+PC9zdmc+");
+}
+
+img[src$="/true.gif"],
+img[src$="/false.gif"],
+img[src$="/warning.gif"],
+img[src$="/sort_up.gif"],
+img[src$="/sort_down.gif"],
+img[src$="/expand.gif"],
+img[src$="/contract.gif"],
+img[src$="/expandall.gif"],
+img[src$="/contractall.gif"],
+img[src$="/edit.gif"],
+img[src$="/newobject.gif"],
+img[src$="/info.gif"],
+img[src$="/reorder.gif"],
+img[src$="/run.gif"],
+img[src$="/green.gif"],
+img[src$="/yellow.gif"],
+img[src$="/red.gif"],
+img[src$="/info-external.gif"],
+img[src$="/delete.gif"],
+img[src$="/view.gif"],
+img[src$="/copy.gif"],
+img[src$="/permissions.gif"],
+img[src$="/import.gif"],
+img[src$="/export.gif"],
+img[src$="/back.gif"] {
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+}
