@@ -350,6 +350,17 @@
         });
     });
 
+    /** ---------------------------------------------------------------
+     * Close button on the ajax-apply fly-in (DesignManager's own
+     * admin_edit_template.tpl/admin_edit_css.tpl append <aside
+     * class="message pagemcontainer/pageerrorcontainer"> straight to
+     * <body> and already auto-remove it after 10s - this just lets the
+     * "Close" affordance they render actually do something before that).
+     * --------------------------------------------------------------- */
+    $(document).on('click', 'aside.message .close-warning', function () {
+        $(this).closest('aside.message').slideUp(200, function () { $(this).remove(); });
+    });
+
     // No tab-init call here: Bootstrap's bundle JS drives data-bs-toggle="tab" on its
     // own via its data-api once BootstrapTheme::postprocess() has rewritten #page_tabs.
     // No textarea-resize JS either - textarea{resize:vertical} in css/style.css covers
@@ -357,6 +368,21 @@
     $(document).ready(function () {
         initHelpDialog();
         initTooltips();
+
+        // See the matching comment in pagetemplate.tpl's <head>: undo the
+        // server-forced "active section is open" submenu state once, for
+        // real, now that the nav markup exists - then drop the pre-paint
+        // CSS override, so every click after this goes through Bootstrap's
+        // own collapse toggle with no interference from either of them.
+        if (document.documentElement.classList.contains('bs-sidebar-narrow')) {
+            document.querySelectorAll('#bs-sidebar-nav > .nav-item > .bs-sidebar-sub.show').forEach(function (sub) {
+                sub.classList.remove('show');
+                var trigger = document.querySelector('[aria-controls="' + sub.id + '"]');
+                if (trigger) trigger.setAttribute('aria-expanded', 'false');
+            });
+            var presuppress = document.getElementById('bs-sidebar-narrow-presuppress');
+            if (presuppress) presuppress.remove();
+        }
 
         $(document).ajaxComplete(function () {
             initTooltips();

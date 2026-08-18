@@ -369,6 +369,59 @@ table.table th {
     font-size: .875em;
 }
 
+/* Ajax "Anwenden"/Apply feedback (DesignManager's own admin_edit_template.tpl
+ * / admin_edit_css.tpl - module code, not ours to edit): on success it
+ * appends <aside class="message pagemcontainer">...<span class="close-warning">
+ * ...<p>{message}</p></aside> straight onto <body>, slides it down, and
+ * auto-removes it after 10s via its own JS - all of that already works.
+ * It just has zero theme CSS to render with, so it's invisible instead of
+ * OneEleven's green fly-in banner. Styled here to match this theme's own
+ * .alert-success/.alert-danger look (messages.tpl) instead of copying
+ * OneEleven's colors verbatim - close button click handled in admin-bridge.js.
+ */
+aside.message {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1090;
+    width: 26rem;
+    max-width: 90%;
+    padding: .75rem 2.25rem .75rem 1rem;
+    border-radius: var(--bs-border-radius);
+    box-shadow: var(--bs-box-shadow);
+    font-size: .9rem;
+}
+aside.message p {
+    margin: 0;
+}
+aside.message.pagemcontainer {
+    color: var(--bs-success-text-emphasis);
+    background-color: var(--bs-success-bg-subtle);
+    border: 1px solid var(--bs-success-border-subtle);
+}
+aside.message.pageerrorcontainer {
+    color: var(--bs-danger-text-emphasis);
+    background-color: var(--bs-danger-bg-subtle);
+    border: 1px solid var(--bs-danger-border-subtle);
+}
+aside.message .close-warning {
+    position: absolute;
+    top: .6rem;
+    right: .6rem;
+    width: 1em;
+    height: 1em;
+    text-indent: -9999px;
+    overflow: hidden;
+    background: transparent var(--bs-btn-close-bg) center / 1em auto no-repeat;
+    border: 0;
+    opacity: .6;
+    cursor: pointer;
+}
+aside.message .close-warning:hover {
+    opacity: 1;
+}
+
 /* Same list-group treatment as #masterlist above, for consistency -
  * "text-only" bullet lists here too. Items also carry jQuery UI's own
  * .ui-state-default/.ui-state-hover classes (still functional, untouched -

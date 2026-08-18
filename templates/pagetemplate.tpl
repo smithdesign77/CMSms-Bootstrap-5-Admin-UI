@@ -19,11 +19,23 @@
 	   frame on every page load - same purpose as the usual dark-mode-flash
 	   prevention snippet, just for sidebar width. See admin-bridge.js for
 	   the toggle button that writes this same localStorage key. *}
+	{literal}
 	<script>
 	if (localStorage.getItem('bs-sidebar-narrow') === '1') {
 	    document.documentElement.classList.add('bs-sidebar-narrow');
+	    // navigation.tpl marks the active section's submenu "show" server-side
+	    // on every full page load, regardless of narrow mode - fine inline in
+	    // wide mode, but in narrow mode that submenu is a flyout, so it would
+	    // pop open unprompted on every navigation. Suppress the very first
+	    // paint synchronously (before the nav markup is even parsed) so there
+	    // is no flash of the flyout; admin-bridge.js's ready handler then
+	    // removes the actual "show" state (and this override) once, so every
+	    // click afterwards goes through Bootstrap's own collapse toggle
+	    // untouched.
+	    document.write('<style id="bs-sidebar-narrow-presuppress">#bs-sidebar-nav>.nav-item>.bs-sidebar-sub.show{display:none!important}</style>');
 	}
 	</script>
+	{/literal}
 	<link rel="shortcut icon" href="{$config.admin_url}/themes/Bootstrap/images/favicon/cmsms-favicon.ico"/>
 	<link rel='apple-touch-icon' href='{$config.admin_url}/themes/Bootstrap/images/favicon/apple-touch-icon-iphone.png' />
 	<link rel='apple-touch-icon' sizes='72x72' href='{$config.admin_url}/themes/Bootstrap/images/favicon/apple-touch-icon-ipad.png' />
