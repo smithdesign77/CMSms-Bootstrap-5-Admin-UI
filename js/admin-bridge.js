@@ -361,6 +361,54 @@
         $(this).closest('aside.message').slideUp(200, function () { $(this).remove(); });
     });
 
+    /** ---------------------------------------------------------------
+     * Generic ajax-apply feedback. DesignManager's admin_edit_template.tpl/
+     * admin_edit_css.tpl (see the CSS comment above) build their own
+     * <aside class="message"> directly and need nothing from the theme -
+     * but other module templates (confirmed: CMSContentManager's
+     * admin_editcontent.tpl) only dispatch a generic "cms_ajax_apply"
+     * event on <body> with .response/.details/.close and expect the
+     * THEME to render something. Ported from OneEleven's own
+     * includes/standard.js showNotifications() cms_ajax_apply handler -
+     * same markup/classes this theme's CSS already styles (see style.css),
+     * same 10s auto-dismiss. Renamed [name$=cancel] to e.close afterwards
+     * like OneEleven did, but via .val()/.text() instead of jQuery UI's
+     * .button('option','label',...) - our own submit buttons are plain
+     * Bootstrap-styled inputs/buttons, not jQuery UI widgets.
+     * --------------------------------------------------------------- */
+    $(document).on('cms_ajax_apply', function (e) {
+        $('aside.message').remove();
+
+        if (e.close) {
+            $('[name$=cancel]').each(function () {
+                var $btn = $(this);
+                if ($btn.is('input')) { $btn.val(e.close); } else { $btn.text(e.close); }
+            });
+        }
+
+        // e.details is a plain string for a single message (DesignManager's
+        // own success text) but a plain array of strings for CMSContentManager's
+        // validation errors (json_encode of a PHP $errors[] array) - []
+        // .concat() normalises either into an array with no extra branching.
+        var $aside;
+        if (e.response === 'Success') {
+            $aside = $('<aside class="message pagemcontainer" role="status"><span class="close-warning">Close</span><p></p></aside>');
+            $aside.find('p').text([].concat(e.details).join(' '));
+        } else {
+            $aside = $('<aside class="message pageerrorcontainer" role="alert"><span class="close-warning">Close</span><ul class="pageerror"></ul></aside>');
+            var $list = $aside.find('ul');
+            [].concat(e.details).forEach(function (msg) { $list.append($('<li/>').text(msg)); });
+        }
+
+        $aside.hide();
+        $('body').append($aside);
+        $aside.slideDown(200, function () {
+            setTimeout(function () {
+                $aside.slideUp(200, function () { $aside.remove(); });
+            }, 10000);
+        });
+    });
+
     // No tab-init call here: Bootstrap's bundle JS drives data-bs-toggle="tab" on its
     // own via its data-api once BootstrapTheme::postprocess() has rewritten #page_tabs.
     // No textarea-resize JS either - textarea{resize:vertical} in css/style.css covers
