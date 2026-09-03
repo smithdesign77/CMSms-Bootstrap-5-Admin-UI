@@ -904,3 +904,47 @@ img[src$="/back.gif"] {
     height: 16px;
     vertical-align: text-bottom;
 }
+
+/* ---------- ModuleManager's A-Z letter index (.pagerows, e.g. "Verfügbare
+   Module") ----------
+ * modules/ModuleManager/templates/adminpanel.tpl:5-13 - only usage of this
+ * class anywhere in the codebase, so safe to target directly. The current
+ * letter is rendered as a bare <strong> (no href, no class), every other
+ * letter as a plain <a> - that distinction is the module's own markup, not
+ * ours, so no JS is needed to detect "which letter is active".
+ */
+.pagerows {
+    /* matches Bootstrap's own .small utility value, same reasoning as
+       .information elsewhere in this file - can't add class="small" to
+       module-owned markup, so match its effect here instead. */
+    font-size: .875em;
+}
+
+.pagerows a,
+.pagerows strong {
+    display: inline-block;
+    min-width: 1.75em;
+    padding: .15rem .4rem;
+    margin: .1rem;
+    text-align: center;
+    border-radius: var(--bs-border-radius-sm);
+    text-decoration: none;
+}
+
+.pagerows a {
+    color: var(--bs-body-color);
+    background-color: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+}
+
+.pagerows a:hover {
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-link-color);
+}
+
+.pagerows strong {
+    background-color: var(--bs-primary);
+    color: #fff;
+    border: 1px solid var(--bs-primary);
+    font-weight: 600;
+}
