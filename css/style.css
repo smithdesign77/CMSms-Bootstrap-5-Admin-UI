@@ -109,6 +109,20 @@ body {
     text-decoration: none;
 }
 
+/* TinyMCE's fullscreen plugin (modules/MicroTiny, skin.min.css) puts the
+ * editor at position:fixed; top:0; z-index:100 and tags <html> with
+ * .mce-fullscreen. Bootstrap's .sticky-top (z-index:1020) leaves our topbar
+ * above that, covering the editor's own top toolbar row so its buttons
+ * can't be clicked. Dropping just below the editor (not position:static -
+ * that would pull the bar out of the sticky flow and shift the layout
+ * underneath on entering/leaving fullscreen) keeps everything else as is;
+ * the fullscreen editor then simply covers the bar, as it does the rest
+ * of the viewport. Toasts (aside.message, z-index 1090) stay above both.
+ */
+html.mce-fullscreen .bs-topbar {
+    z-index: 99;
+}
+
 /* ---------- shell / sidebar layout ---------- */
 .bs-shell {
     display: flex;
