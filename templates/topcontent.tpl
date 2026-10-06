@@ -1,5 +1,5 @@
 {strip}
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3" id="bs-topcontent">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mx-0" id="bs-topcontent">
 {foreach from=$nodes item='node' name='box'}
 	{assign var='module' value="../modules/`$node.name`/images/icon"}
 	{assign var='icon' value="themes/Bootstrap/images/icons/topfiles/`$node.name`"}

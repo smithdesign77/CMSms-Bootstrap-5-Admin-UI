@@ -126,7 +126,6 @@ html.mce-fullscreen .bs-topbar {
 /* ---------- shell / sidebar layout ---------- */
 .bs-shell {
     display: flex;
-    align-items: stretch;
     min-height: calc(100vh - var(--bs-admin-topbar-h));
 }
 
