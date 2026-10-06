@@ -413,6 +413,23 @@
     // own via its data-api once BootstrapTheme::postprocess() has rewritten #page_tabs.
     // No textarea-resize JS either - textarea{resize:vertical} in css/style.css covers
     // it natively in every current browser.
+    /** ---------------------------------------------------------------
+     * CMSContentManager's page list wraps a column header in literal
+     * parentheses - "(Standard)", "(Bewegen)" - while content is locked and
+     * that action is switched off (ajax_get_content.tpl). The <th>s carry no
+     * column class, and which columns exist varies by site setting and
+     * permission, so counting positions in CSS would be wrong for some
+     * users; the parentheses are the module's own, language-independent
+     * marker. The table is re-rendered by AJAX, hence re-run after each load.
+     * --------------------------------------------------------------- */
+    function markDisabledColumnHeaders() {
+        $('#contenttable thead th').each(function () {
+            var $th = $(this),
+                txt = $.trim($th.children('span').first().text());
+            $th.toggleClass('bs-col-disabled', /^\(.+\)$/.test(txt));
+        });
+    }
+
     $(document).ready(function () {
         initHelpDialog();
         initTooltips();
@@ -432,8 +449,10 @@
             if (presuppress) presuppress.remove();
         }
 
+        markDisabledColumnHeaders();
         $(document).ajaxComplete(function () {
             initTooltips();
+            markDisabledColumnHeaders();
         });
 
         $('form').submit(function (ev) {

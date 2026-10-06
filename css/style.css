@@ -812,6 +812,15 @@ img[src$="/true.gif"] {
 img[src$="/false.gif"] {
     content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iIzZjNzU3ZCIgZD0iTTQuMyAzLjNhMSAxIDAgMCAxIDEuNCAwTDggNS42bDIuMy0yLjNhMSAxIDAgMSAxIDEuNCAxLjRMOS40IDdsMi4zIDIuM2ExIDEgMCAwIDEtMS40IDEuNEw4IDguNGwtMi4zIDIuM2ExIDEgMCAwIDEtMS40LTEuNEw2LjYgNyA0LjMgNC43YTEgMSAwIDAgMSAwLTEuNHoiLz48L3N2Zz4=");
 }
+/* CMSContentManager's "Standard" (default page) column: the false.gif in
+ * `page_setdefault` links means "not the start page, click to make it so" -
+ * a muted dash instead of the X, which reads as delete/cancel and turns a
+ * column of mostly "no" into a column of mostly X. Scoped by the module's own
+ * class so the "Aktiv" column (same false.gif, genuinely "off") keeps its X.
+ */
+img.page_setdefault[src$="/false.gif"] {
+    content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iI2FkYjViZCIgZD0iTTMgN2gxMGExIDEgMCAwIDEgMCAySDNhMSAxIDAgMCAxIDAtMnoiLz48L3N2Zz4=");
+}
 img[src$="/warning.gif"] {
     content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNiAxNiI+PHBhdGggZmlsbD0iI2ZkN2UxNCIgZD0iTTcuMSAyLjVhMSAxIDAgMCAxIDEuOCAwbDYgMTFBMSAxIDAgMCAxIDE0IDE1SDJhMSAxIDAgMCAxLS45LTEuNWw2LTExek04IDZhLjc1Ljc1IDAgMCAwLS43NS43NXYzYS43NS43NSAwIDAgMCAxLjUgMHYtM0EuNzUuNzUgMCAwIDAgOCA2em0wIDYuNWEuOS45IDAgMSAwIDAtMS44LjkuOSAwIDAgMCAwIDEuOHoiLz48L3N2Zz4=");
 }
@@ -961,4 +970,31 @@ img[src$="/back.gif"] {
     color: #fff;
     border: 1px solid var(--bs-primary);
     font-weight: 600;
+}
+
+/* ---------- <a> without href used as a JS "button" ----------
+ * A legacy convention across ~8 core/module templates (e.g.
+ * CMSContentManager's #myoptions "Einstellungen", adminlog's #toggle_filters,
+ * ModuleManager's #importbtn, News' #toggle_filter): <a id="x">label</a>
+ * with the click bound in JS. OneEleven's blanket `a { cursor:pointer }`
+ * made those look clickable; without an href the browser shows a text
+ * cursor instead. All of them sit in toolbar containers that already get
+ * the button look above (.pageoptions a / .c_full > .grid_8 > a), so the
+ * only thing missing is the cursor - colour/underline must NOT be touched
+ * here, that would paint link-blue underlined text inside the pill.
+ */
+.pageoptions a:not([href]),
+.c_full > .grid_8 > a:not([href]) {
+    cursor: pointer;
+}
+
+/* CMSContentManager page list: while any page is locked the module switches
+ * its "Standard"/"Bewegen" actions off and wraps those two column headers in
+ * parentheses ("(Standard)", ajax_get_content.tpl:225). admin-bridge.js tags
+ * such headers; muted + oblique reads as "unavailable right now" without
+ * hiding anything (the header's own title still explains why).
+ */
+th.bs-col-disabled {
+    font-style: oblique;
+    opacity: .6;
 }
