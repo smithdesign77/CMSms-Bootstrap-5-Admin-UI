@@ -12,9 +12,10 @@ Copyright 2011–2025 The Bootstrap Authors. Licensed under MIT
 (https://github.com/twbs/bootstrap/blob/main/LICENSE). Both files retain
 their original MIT license banner at the top, unmodified.
 
-## Icon set
+## Icon set and default logos
 
-`images/icons/{system,extra,topfiles,Notifications}/*`
+`images/icons/{system,extra,topfiles,Notifications}/*`,
+`images/default-navbar.png`, `images/default-login.png`
 
 Carried over unmodified from CMS Made Simple's own OneEleven admin theme.
 Part of CMS Made Simple itself, GPLv2, same license as this project.

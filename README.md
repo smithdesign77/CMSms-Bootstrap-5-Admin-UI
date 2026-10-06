@@ -39,6 +39,22 @@ extra dependencies — Bootstrap 5.3.8 and Popper are bundled in `js/` and
 3. To also theme the login screen: Site Admin → Global Settings →
    "Master Admin Theme" → Bootstrap.
 
+## Branding your login page / navbar
+
+The navbar and login page show a logo — CMSms's own logo by default, shipped
+as `images/default-navbar.png` (180×36) and `images/default-login.png`
+(350×68). Two ways to swap it for your own:
+
+- **Simplest:** overwrite `images/default-navbar.png` and
+  `images/default-login.png` directly with your own images of the same name.
+- **Non-destructive:** add `images/my-navbar.png` and/or `images/my-login.png`
+  instead, leaving the shipped defaults untouched. If present, these take
+  priority automatically — useful if you'd rather keep the originals around
+  (e.g. to diff against after updating the theme) than overwrite them.
+
+Either file missing/deleted with no replacement just falls back to text-only,
+same as before this existed — nothing breaks either way.
+
 ## License
 
 GPLv2, see [LICENSE](LICENSE) — this theme is a derivative of CMSms's own

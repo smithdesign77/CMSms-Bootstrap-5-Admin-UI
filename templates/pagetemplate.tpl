@@ -64,7 +64,21 @@
 			   does) - see admin-bridge.js for the click handler and
 			   css/style.css's .bs-sidebar-narrow rules for the actual layout. *}
 			<button id="bs-sidebar-narrow-toggle" class="btn btn-link text-light d-none d-lg-inline-block p-0 me-2" type="button" title="{'open'|lang}/{'close'|lang}">&#9776;</button>
-			<a class="navbar-brand" href="index.php?{$secureparam}">{'adminpaneltitle'|lang} - {sitename}</a>
+			{* Optional brand logo: drop images/my-navbar.png into this theme's
+			   own folder to override images/default-navbar.png (shipped,
+			   CMSms's own logo) without touching/losing it - see README.md.
+			   Same file_exists() convention as navigation.tpl's topfiles
+			   icon fallback. Neither file existing (deleted default, no
+			   custom one) just falls through to text-only, unchanged from
+			   before this existed. *}
+			<a class="navbar-brand d-flex align-items-center gap-2" href="index.php?{$secureparam}">
+				{if file_exists('themes/Bootstrap/images/my-navbar.png')}
+					<img src="{$config.admin_url}/themes/Bootstrap/images/my-navbar.png" height="28" alt="">
+				{elseif file_exists('themes/Bootstrap/images/default-navbar.png')}
+					<img src="{$config.admin_url}/themes/Bootstrap/images/default-navbar.png" height="28" alt="">
+				{/if}
+				<span>{'adminpaneltitle'|lang} - {sitename}</span>
+			</a>
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#bs-topnav">
 				<span class="navbar-toggler-icon"></span>
 			</button>

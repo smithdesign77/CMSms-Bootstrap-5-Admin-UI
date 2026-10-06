@@ -25,6 +25,13 @@
 			<div class="col-12 col-sm-10 col-md-8 col-lg-6">
 				<div class="card shadow">
 					<div class="card-body p-4">
+						{* Same optional-override convention as pagetemplate.tpl's
+						   navbar-brand - see README.md. *}
+						{if file_exists('themes/Bootstrap/images/my-login.png')}
+							<div class="text-center mb-3"><img src="{$config.admin_url}/themes/Bootstrap/images/my-login.png" class="img-fluid" style="max-height:60px" alt=""></div>
+						{elseif file_exists('themes/Bootstrap/images/default-login.png')}
+							<div class="text-center mb-3"><img src="{$config.admin_url}/themes/Bootstrap/images/default-login.png" class="img-fluid" style="max-height:60px" alt=""></div>
+						{/if}
 						<h1 class="h4 text-center mb-3">{'logintitle'|lang}</h1>
 
 						{if isset($error)}<div class="alert alert-danger">{$error}</div>{/if}
