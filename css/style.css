@@ -997,3 +997,21 @@ th.bs-col-disabled {
     font-style: oblique;
     opacity: .6;
 }
+
+/* FilePicker field popup (lib/jquery/js/jquery.cmsms_filepicker.js, used by
+ * FilePicker content-block fields in module forms): the plugin puts an
+ * <iframe> into a jQuery UI dialog (dialogClass cmsfp_dlg) and never sizes
+ * it, relying on the theme - OneEleven has the equivalent rules. Without
+ * them the iframe stays at the browser default of 300x150. The padding rule
+ * needs the extra specificity because jQuery UI's own CSS loads after ours.
+ */
+.ui-dialog .ui-dialog-content.cmsfp_dlg {
+    padding: 0;
+}
+
+.cmsfp_dlg iframe {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    border: 0;
+}
